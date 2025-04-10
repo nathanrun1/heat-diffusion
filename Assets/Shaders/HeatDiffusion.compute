@@ -1,0 +1,76 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CalculateDiffusion
+#pragma kernel TemperatureDisplay
+
+struct TemperatureCell
+{
+    float temperature;
+    float heatSource;
+    float insulation;
+};
+
+RWStructuredBuffer<TemperatureCell> prev;
+RWStructuredBuffer<TemperatureCell> next;
+
+RWTexture2D<float4> heatmap;
+
+int width;
+int height;
+float deltaTime;
+float diffusionFactor;
+uint selectedX;
+uint selectedY;
+
+// Gets index in temperature array given x and y position. Clamps indexing inward.
+int getIndex(int xPos, int yPos)
+{
+    return clamp(yPos, 0, height - 1) * width + clamp(xPos, 0, width - 1);
+}
+
+float inverseLerp(float x, float y, float val)
+{
+    return (val - x) / (y - x);
+}
+
+// Effective heat difference between two cells, taking insulation into account
+float getNbrHeatTransfer(float localTemp, float localInsulation, int otherX, int otherY)
+{
+    int otherIndex = getIndex(otherX, otherY);
+    return (prev[otherIndex].temperature - localTemp) * (1 - localInsulation) * (1 - prev[otherIndex].insulation);
+}
+
+[numthreads(64,1,1)]
+void CalculateDiffusion(uint3 id : SV_DispatchThreadID)
+{
+    int xPos = id.x % width;
+    int yPos = id.x / width;
+    
+    TemperatureCell curCell = prev[id.x];
+    
+    float sumHeatTransfer = 
+        getNbrHeatTransfer(curCell.temperature, curCell.insulation, xPos - 1, yPos) +
+        getNbrHeatTransfer(curCell.temperature, curCell.insulation, xPos + 1, yPos) +
+        getNbrHeatTransfer(curCell.temperature, curCell.insulation, xPos, yPos - 1) +
+        getNbrHeatTransfer(curCell.temperature, curCell.insulation, xPos, yPos + 1);
+    
+    float diffusion = sumHeatTransfer * min(0.24, diffusionFactor * deltaTime); // Any factor above 0.25 is unstable
+    float heat = curCell.heatSource * deltaTime;
+    next[id.x].temperature = curCell.temperature + diffusion + heat;
+    next[id.x].insulation = curCell.insulation;
+    next[id.x].heatSource = curCell.heatSource;
+}
+
+int isSelected(uint3 pos)
+{
+    return (pos.x == selectedX && pos.y == selectedY) ? 1 : 0;
+}
+
+[numthreads(8, 8, 1)]
+void TemperatureDisplay(uint3 id : SV_DispatchThreadID)
+{   
+    TemperatureCell curCell = prev[getIndex(id.x / 8, id.y / 8)];
+    float temp = curCell.temperature;
+    heatmap[id.xy] = float4(inverseLerp(8, 20, temp), curCell.insulation, inverseLerp(12, 0, temp), 1 - isSelected(float3(id.x / 8, id.y / 8, 0)));
+}
+
+
