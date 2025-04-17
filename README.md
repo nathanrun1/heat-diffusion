@@ -45,7 +45,8 @@ Combined with insulation and heat sources, it can easily be seen what type of im
 
 E.g. imagine here the player places a campfire to warm their shelter up (green represents high insulation on a cell), and then some enemy knocks their walls down.
 
-https://github.com/user-attachments/assets/9ed96e6f-b217-4c02-aafc-e811d0b0909f
+
+https://github.com/user-attachments/assets/51a890f4-a17f-4375-8515-06003696afed
 
 ## Try it out yourself
 
