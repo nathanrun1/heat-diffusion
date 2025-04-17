@@ -2,9 +2,9 @@ Currently working on a 2D topdown survival/factory building game. The game is se
 
 Temperature is a core mechanic of this game, so I decided to start creating this game by building a dedicated system for it.
 
-This is essentially a modified snapshot of my early in-development game. The temperature simulation scripts are found in [this folder,](https://github.com/nathanrun1/unity-temperature-diffusion/tree/main/Assets/Scripts/Systems/Temperature) and is built on top of the grid system created in [this folder.](https://github.com/nathanrun1/temperature-diffusion-sim/tree/main/Assets/Scripts/Systems/Grid)
+This is essentially a modified snapshot of my early in-development game. The temperature simulation scripts are found in [this folder,](https://github.com/nathanrun1/heat-diffusion/tree/main/Assets/Scripts/Systems/Temperature) and is built on top of the grid system created in [this folder.](https://github.com/nathanrun1/heat-diffusion/tree/main/Assets/Scripts/Systems/Grid)
 
-The CPU-based temperature system attempt can be found in [this folder.](https://github.com/nathanrun1/temperature-diffusion-sim/tree/main/Assets/Scripts/Systems/Temperature/Old)
+The CPU-based temperature system attempt can be found in [this folder.](https://github.com/nathanrun1/heat-diffusion/tree/main/Assets/Scripts/Systems/Temperature/Old)
 
 ## Design of the Temperature System
 The temperature system works by representing the temperature of each position in the world using a 2D grid. Each square in the grid represents a region (of customizable size) in the 2D scene that the player will build, fight and survive in. 
@@ -29,7 +29,7 @@ I first attempted to implement the temperature system in pure C# (i.e. running i
 My first thought to solve this was to use ECS and multithreading, but then my friend suggested using [compute shaders](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeShader.html).
 Since this simulation could be computed using massively parallel identical computations for each cell, running it on the GPU was a great solution, and much simpler to implement than ECS.
 
-The compute shader implementation was quite simple thanks to Unity's API. To run the diffusion calculations, the compute shader [itself](https://github.com/nathanrun1/temperature-diffusion-sim/blob/main/Assets/Shaders/HeatDiffusion.compute) implements the algorithm described above. On the CPU, the actual temperature grid is stored and passed to the shader using [compute buffers](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeBuffer.html).
+The compute shader implementation was quite simple thanks to Unity's API. To run the diffusion calculations, the compute shader [itself](https://github.com/nathanrun1/heat-diffusion/blob/main/Assets/Shaders/HeatDiffusion.compute) implements the algorithm described above. On the CPU, the actual temperature grid is stored and passed to the shader using [compute buffers](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeBuffer.html).
 
 On the CPU/RAM side, the entire temperature grid for the whole scene is stored as a flattened array. The script that interacts with the compute shader then stores a dedicated "window", which is a copy of a smaller specific region of the whole grid, meant to be the region currently surrounding the player.
 
