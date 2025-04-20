@@ -27,7 +27,7 @@ The calculation is similar, except that the simulation assumes the time step is 
 I first attempted to implement the temperature system in pure C# (i.e. running it on the CPU), but this ended up being extremely slow. For a 10,000 cell grid, it took a few seconds to compute a single time step. For smaller grids of around 1000 cells, the framerate still dropped significantly. To keep my game immersive, I needed a much more performant solution.
 
 My first thought to solve this was to use ECS and multithreading, but then my friend suggested using [compute shaders](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeShader.html).
-Since this simulation could be computed using massively parallel identical computations for each cell, running it on the GPU was a great solution, and much simpler to implement than ECS.
+Since this simulation could be computed in parralel with many independant identical computations, running it on the GPU was a great solution, and much simpler to implement than ECS.
 
 The compute shader implementation was quite simple thanks to Unity's API. To run the diffusion calculations, the compute shader [itself](https://github.com/nathanrun1/heat-diffusion/blob/main/Assets/Shaders/HeatDiffusion.compute) implements the algorithm described above. On the CPU, the actual temperature grid is stored and passed to the shader using [compute buffers](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/ComputeBuffer.html).
 
