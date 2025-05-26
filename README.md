@@ -13,14 +13,27 @@ Each square holds a "cell", which contains three values:
 - Insulation (Float in range 0 -> 1): How fast temperature can be transferred to/from the cell. Higher insulation means the cell changes temperature more slowly, insulation = 1 means it cannot transfer heat. This is useful for shelters built by the player, for example.
 - Heat (Float of any value): How much temperature is added (or removed if negative) to this cell per second, useful for heat sources, or even negative heat sources, e.g. enemies that steal heat from the player's constructions by walking near them.
 
-During runtime, heat is transferred between a cell and its four neighbors (i.e. not including diagonal neighbors), and also gained/lost based on the cell's heat.\
+During runtime, heat is transferred between a cell and its four neighbors (i.e. not including diagonal neighbors), and also gained/lost based on the cell's heat.
+
 The temperature change due to heat transfer is calculated by adding the temperature difference between this cell and each of its neighbors, and then multiplying the sum by a 
-set diffusion factor $\alpha$, the change in time since the last update $\Delta t$, and again by the complement of the insulation $1 - I$.\
-The cell additionally gains/loses temperature based on its heat value, by adding the product of the cell's heat with the change in time $h\Delta t$\
-As a result, the overall temperature change is calculated using the following formula:
-$$\Delta T = \alpha \Delta t (1-I)\sum_{T_n \in N}(T-T_n) + h\Delta t$$\
+set diffusion factor $\alpha$, the change in time since the last update $\Delta t$, and again by the complement of the insulation $1 - I$.
+
+The cell additionally gains/loses temperature based on its heat value, by adding the product of the cell's heat with the change in time $h\Delta t$
+
+As a result, the overall temperature change is calculated at each step using the following formula:
+$$\Delta T = \alpha \Delta t (1-I)\sum_{T_n \in N}(T-T_n) + h\Delta t$$
+
+Where:
+- $\Delta T$ is the change in the cell's temperature
+- $\alpha$ is the heat diffusion factor
+- $\Delta t$ is the change in time since the previous update
+- $I$ is the cell's insulation
+- $N$ is the set of neighboring cells
+- $T_n$ is the temperature of neighboring cell $n$
+- $h$ is the cell's heat factor
+
 This is an approximation of [Fourier's Law](https://en.wikipedia.org/wiki/Thermal_conduction#Fourier.27s_law:~:text=temperature%2C%20gives%20the-,heat%20flow%20rate%20as,-%F0%9D%91%84).
-The calculation is similar, except that the simulation assumes the time step is small enough that heat from one cell would only non-negligibly reach its neighbors during the time step, and would go no further until the next time step.
+The calculation is similar, except that the simulation assumes the time step is small enough that heat from one cell would only non-negligibly reach its neighbors during the time step, and goes no further until the next time step.
 
 ## Current Implementation
 
